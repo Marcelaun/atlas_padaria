@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerador de Licença - ATLAS PDV</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #0f0f11; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .box { background: #18181c; padding: 30px; border-radius: 12px; border: 1px solid #2a2a32; text-align: center; }
+    input { width: 100%; padding: 12px; background: #202025; border: 1px solid #2a2a32; border-radius: 8px; color: white; font-size: 16px; margin-bottom: 15px; text-align: center; text-transform: uppercase;}
+    button { width: 100%; padding: 14px; background: #c8f135; color: black; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+    .resultado { margin-top: 20px; font-size: 32px; letter-spacing: 4px; color: #c8f135; font-family: monospace; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+  <div class="box">
+    <h2 style="margin-top:0">🔑 Gerador ATLAS</h2>
+    <input type="text" id="codigoCliente" placeholder="Cole o Código da Máquina aqui...">
+    <button onclick="gerarChave()">Gerar Chave de Liberação</button>
+    <div id="resultado" class="resultado">------</div>
+  </div>
+
+  <script>
+    function gerarChave() {
+      const codigo = document.getElementById('codigoCliente').value.trim().toUpperCase();
+      if (!codigo) return alert('Digite o código do cliente!');
+
+      // A matemática secreta: Junta o código do cliente com a palavra passe e faz um MD5
+      const hash = CryptoJS.MD5(codigo + "ATLAS_SECRETO_2026").toString();
+
+      // Pega os 6 primeiros caracteres pra ser a chave final
+      document.getElementById('resultado').innerText = hash.substring(0, 6).toUpperCase();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{
+  "name": "atlas",
+  "version": "1.0.0",
+  "description": "An Electron application with React",
+  "main": "./out/main/index.js",
+  "author": {
+    "name": "Marcelo Almeida",
+    "email": "contatomarceloalmeidabarbosa@gmail.com"
+  },
+  "homepage": "https://electron-vite.org",
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "eslint --cache .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1083.0",
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@prisma/client": "^6.19.2",
+    "archiver": "^8.0.0",
+    "electron-updater": "^6.8.9",
+    "node-cron": "^4.6.0"
+  },
+  "build": {
+    "appId": "com.atlas.pdv",
+    "productName": "Atlas PDV",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Marcelaun",
+        "repo": "atlas_padaria"
+      }
+    ],
+    "asar": false,
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "out/**/*",
+      "node_modules/@prisma/client/**/*",
+      "node_modules/.prisma/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "prisma/dev.db",
+        "to": "prisma/dev.db"
+      },
+      {
+        "from": "node_modules/.prisma",
+        "to": "app/node_modules/.prisma"
+      },
+      {
+        "from": "node_modules/@prisma/client",
+        "to": "app/node_modules/@prisma/client"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "tar.gz"
+      ],
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  },
+  "devDependencies": {
+    "@electron-toolkit/eslint-config": "^2.1.0",
+    "@electron-toolkit/eslint-config-prettier": "^3.0.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^5.1.1",
+    "electron": "^39.2.6",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^5.0.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.7.4",
+    "prisma": "^6.19.2",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "vite": "^7.2.6",
+    "vitest": "^4.1.3"
+  }
+}

@@ -1,0 +1,229 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Cliente {
+  id             Int       @id @default(autoincrement())
+  nomeCompleto   String
+  cpf            String    @unique
+  telefone       String?
+  endereco       String?   
+  dataNascimento DateTime?
+  criadoEm       DateTime  @default(now())
+  atualizadoEm   DateTime  @updatedAt
+
+  vendas         Venda[]
+  tags           Tag[]
+  metadata       String?
+  contratos      Contrato[] // Relação com contratos
+  lancamentos    Lancamento[] @relation("LancamentosCliente")
+}
+
+model Contrato {
+  id           Int      @id @default(autoincrement())
+  titulo       String   // Ex: Mensalista Pão Diário
+  valorMensal  Float
+  diaVencimento Int     @default(10)
+  status       String   @default("ATIVO") // ATIVO, SUSPENSO, ENCERRADO
+  dataInicio   DateTime @default(now())
+  dataFim      DateTime?
+  
+  clienteId    Int
+  cliente      Cliente  @relation(fields: [clienteId], references: [id])
+  
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+model Tag {
+  id       Int       @id @default(autoincrement())
+  nome     String    @unique
+  clientes Cliente[]
+}
+
+// 👇 O modelo de Configuração (AGORA COM O MACHINE ID)
+model Configuracao {
+  id           Int     @id @default(1)
+  senhaGerente String  @default("123456")
+  nomeEmpresa  String  @default("Atlas")
+  // 🔐 NOVO: Guarda o código único da Placa-Mãe do PC autorizado
+  machineId    String?
+  unidadesMedida String? @default("KG,UN,G,LT,ML,CX,PCT,Fatias")
+}
+
+model Usuario {
+  id       Int      @id @default(autoincrement())
+  nome     String   @unique
+  senha    String
+  role     String   @default("funcionario") // "dono" ou "funcionario"
+  criadoEm DateTime @default(now())
+}
+
+model Categoria {
+  id       Int       @id @default(autoincrement())
+  nome     String
+  produtos Produto[]
+}
+
+model Produto {
+  id            Int       @id @default(autoincrement())
+  codigoBarras  String?   @unique
+  nome          String
+  precoCusto    Float
+  precoVenda    Float
+  estoqueAtual  Float     @default(0)
+  unidadeMedida String    @default("UN") // UN, KG, G, LT
+  isAdicional   Boolean   @default(false) // Para itens como "Ovo", "Queijo Extra"
+
+  categoriaId   Int?
+  categoria     Categoria? @relation(fields: [categoriaId], references: [id])
+
+  movimentacoes MovimentacaoEstoque[]
+  // 👇 ADICIONADO: Materiais que compõem este produto
+  materiais     ProdutoMaterial[]
+
+  // 👇 ADICIONADO: Para o produto saber em quais vendas ele apareceu
+  itensVenda    ItemVenda[]
+
+  // Para controle de produção
+  producoesOrigem  Producao[] @relation("ProdutoOrigem")
+  producoesDestino Producao[] @relation("ProdutoDestino")
+
+  criadoEm      DateTime  @default(now())
+  atualizadoEm  DateTime  @updatedAt
+}
+
+model Producao {
+  id              Int      @id @default(autoincrement())
+  quantidade      Float    // Qtd produzida (Ex: 50 unidades)
+  perda           Float    @default(0) // Caso queime algum pão
+  data            DateTime @default(now())
+  
+  produtoOrigemId Int      // Ex: Pão de Queijo Congelado (KG)
+  produtoOrigem   Produto  @relation("ProdutoOrigem", fields: [produtoOrigemId], references: [id])
+  
+  produtoDestinoId Int     // Ex: Pão de Queijo Assado (UN)
+  produtoDestino   Produto @relation("ProdutoDestino", fields: [produtoDestinoId], references: [id])
+}
+
+model MovimentacaoEstoque {
+  id          Int      @id @default(autoincrement())
+  produtoId   Int
+  produto     Produto  @relation(fields: [produtoId], references: [id])
+  tipo        String
+  quantidade  Float
+  motivo      String
+  data        DateTime @default(now())
+}
+
+model Venda {
+  id            Int          @id @default(autoincrement())
+  total         Float
+  metodoPagto   String
+  data          DateTime     @default(now())
+  itens         ItemVenda[]
+  clienteId     Int?
+  cliente       Cliente?     @relation(fields: [clienteId], references: [id])
+  comandaId     Int?
+  comanda       Comanda?     @relation(fields: [comandaId], references: [id])
+  sessaoCaixaId Int?
+  sessaoCaixa   SessaoCaixa? @relation(fields: [sessaoCaixaId], references: [id])
+}
+
+model ItemVenda {
+  id            Int     @id @default(autoincrement())
+  vendaId       Int
+  venda         Venda   @relation(fields: [vendaId], references: [id])
+  produtoId     Int
+  produto       Produto @relation(fields: [produtoId], references: [id])
+  quantidade    Float
+  precoUnitario Float
+  adicionais    String? // Texto descrevendo os extras (Ex: "+ Ovo, + Queijo")
+}
+
+model Lancamento {
+  id            Int          @id @default(autoincrement())
+  tipo          String       // "ENTRADA" ou "SAIDA"
+  descricao     String
+  valor         Float
+  vencimento    DateTime?
+  pago          Boolean      @default(false)
+  criadoEm      DateTime     @default(now())
+  sessaoCaixaId Int?
+  sessaoCaixa   SessaoCaixa? @relation(fields: [sessaoCaixaId], references: [id])
+  clienteId     Int?
+  cliente       Cliente?     @relation("LancamentosCliente", fields: [clienteId], references: [id])
+}
+
+// 👇 NOVO: Tabela para o estoque de matéria-prima
+model Material {
+  id             Int       @id @default(autoincrement())
+  nome           String
+  custoPorMedida Float     // Ex: Custo de 1 metro ou 1 unidade
+  unidadeMedida  String    // Ex: "Metros", "Centímetros", "Unidade", "Gramas"
+  estoqueAtual   Float     @default(0)
+
+  // Relação com os produtos que usam este material
+  produtosUsados ProdutoMaterial[]
+
+  criadoEm       DateTime  @default(now())
+  atualizadoEm   DateTime  @updatedAt
+}
+
+// 👇 NOVO: Tabela de ligação (Ficha Técnica do Produto)
+model ProdutoMaterial {
+  id           Int      @id @default(autoincrement())
+
+  produtoId    Int
+  produto      Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  materialId   Int
+  material     Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  quantidade   Float    // O quanto desse material vai em 1 produto (Ex: 1.5 metros)
+}
+
+model Comanda {
+  id           Int       @id @default(autoincrement())
+  numero       String    @unique
+  status       String    @default("ABERTA") // ABERTA, PAGA, CANCELADA
+  total        Float     @default(0)
+  vendas       Venda[]
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+}
+
+model Encomenda {
+  id               Int      @id @default(autoincrement())
+  numero           Int      @unique
+  clienteNome      String
+  clienteCpf       String
+  clienteWhatsapp  String
+  descricao        String   // Detalhes do bolo/salgados
+  valorTotal       Float
+  valorSinal       Float    @default(0)
+  status           String   @default("PENDENTE") // PENDENTE, PRODUCAO, ENTREGUE, CANCELADA
+  dataEntrega      DateTime
+  dataEntrada      DateTime @default(now())
+  dataAtualizacao  DateTime @updatedAt
+  lancamentoId     Int?
+}
+
+// 👇 NOVO: Controle de Caixa
+model SessaoCaixa {
+  id              Int          @id @default(autoincrement())
+  dataAbertura    DateTime     @default(now())
+  dataFechamento  DateTime?
+  valorAbertura   Float
+  valorFechamento Float?
+  status          String       @default("ABERTA") // ABERTA, FECHADA
+
+  vendas          Venda[]
+  lancamentos     Lancamento[]
+}
