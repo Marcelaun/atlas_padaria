@@ -1288,16 +1288,16 @@ function App() {
         {/* 👇 AQUI ESTÁ O NOVO BOTÃO DE COPIAR */}
         <div
           style={{
-            background: 'var(--surface2)',
+            background: '#1b1b1f',
             padding: '15px 30px',
             borderRadius: '8px',
-            border: '1px dashed var(--border)',
+            border: '1px dashed #32363f',
             marginBottom: '30px',
             textAlign: 'center',
             position: 'relative'
           }}
         >
-          <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '5px' }}>
+          <div style={{ fontSize: '11px', color: '#888', marginBottom: '5px' }}>
             CÓDIGO DESTA MÁQUINA
           </div>
           <div
