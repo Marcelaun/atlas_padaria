@@ -1345,7 +1345,13 @@ function App() {
             value={senhaLicenca}
             onChange={(e) => setSenhaLicenca(e.target.value)}
             className="input"
-            style={{ width: '250px', margin: 0 }}
+            style={{ 
+              width: '250px', 
+              margin: 0,
+              backgroundColor: '#1b1b1f',
+              color: '#ffffff',
+              border: '1px solid #32363f'
+            }}
           />
           <button
             className="btn-primary"
