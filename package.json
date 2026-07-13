@@ -1,6 +1,6 @@
 {
   "name": "atlas",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
   "author": {
@@ -38,7 +38,8 @@
       {
         "provider": "github",
         "owner": "Marcelaun",
-        "repo": "atlas_padaria"
+        "repo": "atlas_padaria",
+        "releaseType": "release"
       }
     ],
     "asar": false,
