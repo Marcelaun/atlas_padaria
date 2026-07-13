@@ -191,7 +191,7 @@ app.whenReady().then(() => {
       if (config.machineId === currentId) {
         return { status: 'AUTORIZADO' }
       } else {
-        return { status: 'BLOQUEADO' }
+        return { status: 'BLOQUEADO', codigo: currentId }
       }
     } catch (erro) {
       return { status: 'ERRO' }
