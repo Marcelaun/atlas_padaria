@@ -14,7 +14,7 @@ import { autoUpdater } from 'electron-updater'
 import { PrismaClient } from '@prisma/client'
 
 // ─── MONITORAMENTO DE ERROS VIA WEBHOOK (DISCORD/TELEGRAM) ───────
-const WEBHOOK_URL = '' // <-- COLOQUE SUA URL DO WEBHOOK DO DISCORD AQUI
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526339387007439028/RSmXBYFRMNQWUgo9KYCY-wCqQhoo71lZSimH9unow_jI9teRKkPdOkvMUAjJBCCj5HtM' // <-- COLOQUE SUA URL DO WEBHOOK DO DISCORD AQUI
 
 function reportarErroGlobal(erro, contexto) {
   console.error(`[${contexto}]`, erro)
