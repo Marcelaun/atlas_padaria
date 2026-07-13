@@ -1260,30 +1260,7 @@ function App() {
     )
   }
 
-  if (licenca === 'BLOQUEADO') {
-    return (
-      <div
-        style={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#0a0a0c',
-          color: 'var(--red)'
-        }}
-      >
-        <Icon.X />
-        <h1 style={{ marginTop: '20px', letterSpacing: '-1px' }}>ACESSO NEGADO</h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: '10px' }}>
-          Esta cópia do sistema está vinculada a outro hardware.
-        </p>
-        <p style={{ color: 'var(--text-muted)' }}>Entre em contato com o desenvolvedor.</p>
-      </div>
-    )
-  }
-
-  if (licenca === 'PENDENTE') {
+  if (licenca === 'BLOQUEADO' || licenca === 'PENDENTE') {
     return (
       <div
         style={{
@@ -1296,8 +1273,14 @@ function App() {
           color: 'white'
         }}
       >
-        <h1 style={{ marginBottom: '10px', color: 'var(--accent)' }}>ATLAS PDV</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Este computador ainda não está autorizado.</p>
+        <h1 style={{ marginBottom: '10px', color: licenca === 'BLOQUEADO' ? 'var(--red)' : 'var(--accent)' }}>
+          {licenca === 'BLOQUEADO' ? 'ACESSO NEGADO' : 'ATLAS PDV'}
+        </h1>
+        <p style={{ color: 'var(--text-muted)' }}>
+          {licenca === 'BLOQUEADO' 
+            ? 'Esta cópia do sistema está vinculada a outro hardware. Insira uma nova chave.' 
+            : 'Este computador ainda não está autorizado.'}
+        </p>
         <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>
           Envie o código abaixo para o suporte para receber sua chave de liberação.
         </p>
