@@ -55,7 +55,7 @@ style.textContent = `
   .card-header { padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); }
   .card-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
   
-  .dual-layout { display: grid; grid-template-columns: 380px 1fr; gap: 30px; align-items: start; }
+  .dual-layout { display: grid; grid-template-columns: 500px 1fr; gap: 30px; align-items: start; }
   .pdv-layout { display: grid; grid-template-columns: 1fr 400px; gap: 30px; flex: 1; min-height: 0; }
   
   .search-wrap { position: relative; margin-bottom: 20px; }

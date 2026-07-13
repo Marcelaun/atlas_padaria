@@ -2,6 +2,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import App from './App'
 
+async function doLogin() {
+  const inputUsuario = await screen.findByPlaceholderText('Usuário')
+  const inputSenha = await screen.findByPlaceholderText('Senha')
+  fireEvent.change(inputUsuario, { target: { value: 'admin' } })
+  fireEvent.change(inputSenha, { target: { value: '123' } })
+  fireEvent.click(screen.getByText('Entrar no Sistema'))
+}
+
 describe('Padaria Tio Irineu - App Principal', () => {
   beforeEach(() => {
     if (window.resetCaixaMock) window.resetCaixaMock()
@@ -9,11 +17,13 @@ describe('Padaria Tio Irineu - App Principal', () => {
 
   it('deve renderizar a tela inicial com abas', async () => {
     render(<App />)
+    await doLogin()
     expect(await screen.findByText(/Caixa Fechado/i)).toBeInTheDocument()
   })
 
   it('deve calcular a Margem de Lucro dinamicamente no cadastro', async () => {
     render(<App />)
+    await doLogin()
     // Esperar o app carregar
     expect(await screen.findByText(/Caixa Fechado/i)).toBeInTheDocument()
     
@@ -40,6 +50,7 @@ describe('Padaria Tio Irineu - App Principal', () => {
 
   it('deve permitir adicionar itens adicionais no carrinho', async () => {
     render(<App />)
+    await doLogin()
     expect(await screen.findByText(/Caixa Fechado/i)).toBeInTheDocument()
     const caixaInput = await screen.findByRole('spinbutton')
     fireEvent.change(caixaInput, { target: { value: '100' } })
@@ -67,6 +78,7 @@ describe('Padaria Tio Irineu - App Principal', () => {
     const fornadaSpy = vi.spyOn(window.api, 'lancarFornada')
     
     render(<App />)
+    await doLogin()
     expect(await screen.findByText(/Caixa Fechado/i)).toBeInTheDocument()
     
     const navButtons = await screen.findAllByRole('button')
@@ -107,5 +119,34 @@ describe('Padaria Tio Irineu - App Principal', () => {
         quantidade: '50'
       }))
     })
+  })
+
+  it('deve pedir o peso e calcular valor correto para produtos KG', async () => {
+    render(<App />)
+    await doLogin()
+    expect(await screen.findByText(/Caixa Fechado/i)).toBeInTheDocument()
+    
+    // Abrir o caixa
+    const caixaInput = await screen.findByRole('spinbutton')
+    fireEvent.change(caixaInput, { target: { value: '100' } })
+    fireEvent.click(screen.getByText('ABRIR CAIXA'))
+
+    // Mocar o prompt para retornar "1.500" kg
+    vi.stubGlobal('prompt', () => '1.500')
+
+    const searchInput = await screen.findByPlaceholderText(/Bipe/i, {}, { timeout: 3000 })
+    fireEvent.change(searchInput, { target: { value: 'Massa' } })
+
+    expect(await screen.findByText(/Massa/i, {}, { timeout: 3000 })).toBeInTheDocument()
+    
+    // O produto "Massa" custa 5.0 reais e é KG. 1.5kg * 5.0 = 7.5
+    fireEvent.click(screen.getByText(/Massa/i))
+
+    // Validar se o total do carrinho atualizou para R$ 7,50
+    const els = await screen.findAllByText(/7,50/)
+    expect(els.length).toBeGreaterThan(0)
+    
+    // Restaurar mock
+    vi.unstubAllGlobals()
   })
 })

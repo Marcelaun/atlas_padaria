@@ -57,6 +57,7 @@ window.api = {
   abrirCaixa: async () => {
     caixaAberta = true
     return { sucesso: true }
-  }
+  },
+  login: async () => ({ sucesso: true, usuario: { nome: 'Admin', role: 'dono' } })
   // Você pode adicionar mais mocks conforme for testando outras funcionalidades!
 }
