@@ -13,6 +13,43 @@ import { autoUpdater } from 'electron-updater'
 
 import { PrismaClient } from '@prisma/client'
 
+// ─── MONITORAMENTO DE ERROS VIA WEBHOOK (DISCORD/TELEGRAM) ───────
+const WEBHOOK_URL = '' // <-- COLOQUE SUA URL DO WEBHOOK DO DISCORD AQUI
+
+function reportarErroGlobal(erro, contexto) {
+  console.error(`[${contexto}]`, erro)
+  if (!WEBHOOK_URL) return
+
+  const env = is.dev ? 'DESENVOLVIMENTO' : 'PRODUÇÃO'
+  const os = require('os')
+  const machine = os.hostname()
+
+  const payload = {
+    content: `🚨 **ERRO NO ATLAS PDV** 🚨`,
+    embeds: [{
+      title: `Erro em ${env}`,
+      color: 16711680, // Vermelho
+      fields: [
+        { name: 'Máquina', value: machine, inline: true },
+        { name: 'Contexto', value: contexto, inline: true },
+        { name: 'Mensagem', value: erro.message || String(erro) }
+      ],
+      description: `\`\`\`javascript\n${erro.stack ? erro.stack.substring(0, 1000) : 'Sem stack trace'}\n\`\`\``,
+      timestamp: new Date().toISOString()
+    }]
+  }
+
+  fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(err => console.error('Falha ao enviar erro pro webhook:', err))
+}
+
+process.on('uncaughtException', (err) => reportarErroGlobal(err, 'uncaughtException'))
+process.on('unhandledRejection', (reason) => reportarErroGlobal(reason, 'unhandledRejection'))
+// ─────────────────────────────────────────────────────────────────
+
 // ─── A MÁGICA DA PERSISTÊNCIA DO BANCO DE DADOS ─────────────────
 app.setPath('userData', join(app.getPath('appData'), 'AtlasPDV_Pro'))
 
