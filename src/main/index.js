@@ -1070,6 +1070,7 @@ app.whenReady().then(() => {
       const s3Client = new S3Client({
         endpoint: b2Config.endpoint,
         region: b2Config.region || 'us-east-005',
+        forcePathStyle: true, // Necessário para Backblaze B2 em algumas regiões S3-compatíveis
         credentials: {
           accessKeyId: b2Config.keyId,
           secretAccessKey: b2Config.applicationKey
@@ -1112,6 +1113,7 @@ app.whenReady().then(() => {
 
     } catch (error) {
       console.error('Erro no backup:', error)
+      reportarErroGlobal(error, 'BACKUP-CLOUD')
       return { sucesso: false, erro: error.message }
     }
   }
