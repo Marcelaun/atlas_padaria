@@ -770,6 +770,11 @@ function App() {
   const [senhaLicenca, setSenhaLicenca] = useState('')
   const [codigoMaquina, setCodigoMaquina] = useState('') // Essa era a que estava faltando!
 
+  // ─── ESTADOS DO AUTO UPDATER ───
+  const [updateStatus, setUpdateStatus] = useState(null) // 'downloading', 'downloaded'
+  const [updateProgress, setUpdateProgress] = useState(0)
+  const [updateInfo, setUpdateInfo] = useState(null)
+
   const [showModalFornada, setShowModalFornada] = useState(false)
   const [caixaAtivo, setCaixaAtivo] = useState(null)
   const [valorAberturaCaixa, setValorAberturaCaixa] = useState('')
@@ -903,6 +908,20 @@ function App() {
     if (resT?.sucesso) setListaTags(resT.tags)
     if (resCaixa?.sucesso) setCaixaAtivo(resCaixa.caixa)
     if (resU && resU.sucesso) setUnidadesCadastradas(resU.unidades)
+
+    if (window.api.onUpdateAvailable) {
+      window.api.onUpdateAvailable((info) => {
+        setUpdateInfo(info)
+        setUpdateStatus('downloading')
+      })
+      window.api.onDownloadProgress((progressObj) => {
+        setUpdateProgress(progressObj.percent)
+      })
+      window.api.onUpdateDownloaded((info) => {
+        setUpdateInfo(info)
+        setUpdateStatus('downloaded')
+      })
+    }
   }
 
   useEffect(() => {
@@ -2631,7 +2650,7 @@ function App() {
 
         {modalAdicionalItemPdv !== null && (
           <div className="modal-overlay" onClick={() => setModalAdicionalItemPdv(null)}>
-            <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div className="modal-box" style={{ width: '400px', padding: 0 }} onClick={e => e.stopPropagation()}>
               <div className="card-header">
                 <span className="card-title">Selecione o Adicional</span>
                 <button className="btn-icon" onClick={() => setModalAdicionalItemPdv(null)}><Icon.X /></button>
@@ -2655,6 +2674,49 @@ function App() {
                   ))
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL DE ATUALIZAÇÃO */}
+        {updateStatus !== null && (
+          <div className="modal-overlay">
+            <div className="modal-box" style={{ width: '450px', textAlign: 'center', padding: '30px' }}>
+              <div style={{ display: 'inline-block', width: '50px', height: '50px', borderRadius: '50%', background: 'var(--yellow)', color: '#000', lineHeight: '50px', marginBottom: '20px', fontSize: '24px' }}>
+                🚀
+              </div>
+              <h2 style={{ marginBottom: '10px', color: 'var(--text)' }}>
+                Nova Atualização Encontrada!
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '25px' }}>
+                Versão {updateInfo?.version || 'mais recente'} disponível.
+              </p>
+
+              {updateStatus === 'downloading' && (
+                <div>
+                  <div style={{ background: 'var(--surface2)', height: '8px', borderRadius: '4px', overflow: 'hidden', marginBottom: '10px' }}>
+                    <div style={{ background: 'var(--accent)', height: '100%', width: `${updateProgress}%`, transition: 'width 0.2s' }} />
+                  </div>
+                  <p style={{ fontSize: '12px', color: 'var(--accent)' }}>
+                    Baixando... {Math.round(updateProgress)}%
+                  </p>
+                </div>
+              )}
+
+              {updateStatus === 'downloaded' && (
+                <div>
+                  <p style={{ color: 'var(--green)', fontSize: '14px', marginBottom: '20px', fontWeight: 'bold' }}>
+                    Download Concluído!
+                  </p>
+                  <button 
+                    className="btn-primary" 
+                    style={{ width: '100%', padding: '15px', fontSize: '16px' }}
+                    onClick={() => window.api.instalarAtualizacao()}
+                  >
+                    Instalar Agora
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

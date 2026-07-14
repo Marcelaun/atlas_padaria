@@ -81,7 +81,13 @@ const api = {
   caixaStatus: () => ipcRenderer.invoke('caixa-status'),
   abrirCaixa: (valorInicial) => ipcRenderer.invoke('abrir-caixa', valorInicial),
   fecharCaixa: (dados) => ipcRenderer.invoke('fechar-caixa', dados),
-  movimentarCaixa: (dados) => ipcRenderer.invoke('movimentar-caixa', dados)
+  movimentarCaixa: (dados) => ipcRenderer.invoke('movimentar-caixa', dados),
+
+  // ─── AUTO UPDATER ───
+  onUpdateAvailable: (callback) => ipcRenderer.on('updater:update-available', (_, info) => callback(info)),
+  onDownloadProgress: (callback) => ipcRenderer.on('updater:download-progress', (_, progressObj) => callback(progressObj)),
+  onUpdateDownloaded: (callback) => ipcRenderer.on('updater:update-downloaded', (_, info) => callback(info)),
+  instalarAtualizacao: () => ipcRenderer.invoke('instalar-atualizacao')
 }
 
 if (process.contextIsolated) {

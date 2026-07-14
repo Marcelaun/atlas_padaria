@@ -1,6 +1,6 @@
 {
   "name": "atlas",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
   "author": {
